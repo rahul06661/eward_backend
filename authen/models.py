@@ -68,7 +68,6 @@ class Users(models.Model):
     ward = models.CharField(max_length=3)
     housenumber = models.CharField(max_length=3)
     password=models.CharField(max_length=20) 
-    date_of_birth=models.DateField(null=True)
     qualification=models.CharField(max_length=100,null=True)
     approval=models.BooleanField(default=False)
    

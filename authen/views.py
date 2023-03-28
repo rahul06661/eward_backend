@@ -29,8 +29,6 @@ def UserRegisteration(request):
     if request.method == 'POST':
         email = request.POST['email']
         print(email)
-        # if not re.match("^[\w\,\+\-]@[\w]+\,[a-z]{2,3}$",email):
-        #    return JsonResponse({'error':'Invalid Mail Address'})
         firstname = request.POST['firstname']
         lastname = request.POST['lastname']
         voter_id = request.POST['voter_id']
@@ -43,13 +41,14 @@ def UserRegisteration(request):
         ward = request.POST['ward']
         housenumber = request.POST['housenumber']
         password = request.POST['password']
+        qualification = request.POST['qualification']
 
         member = Member.objects.get(ward=ward)
         print(
             "___ ____ ______ ___ _____ ____ ____ ______ ___ _____ ___ ____ _________ _____")
         print(member)
         user_obj = Users(member_email=member, email=email, firstname=firstname, lastname=lastname, voter_id=voter_id, job=job,
-                         tax_payer=tax_payer, age=age, gender=gender, phone=phone, blood_group=blood_group, ward=ward, housenumber=housenumber, password=password, approval=False)
+                         tax_payer=tax_payer, qualification=qualification, age=age, gender=gender, phone=phone, blood_group=blood_group, ward=ward, housenumber=housenumber, password=password, approval=False)
         user_obj.save()
         custuserobj = CustomUser.objects.create_user(
             email=email, utype='user', password=password)
