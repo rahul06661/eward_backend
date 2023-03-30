@@ -4,7 +4,7 @@ from .models import *
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model=Notification       
-        fields = ['name','img_path','desc','status','created_on','update_on']
+        fields = ['id','name','img_path','desc','status','created_on','update_on']
 
 class ComplaintSerializer(serializers.ModelSerializer):
     class Meta:

@@ -58,6 +58,7 @@ def get_complaint(request):
 @csrf_exempt
 def post_complaint(request):
     if request.method == "POST":
+        img_path=" "
         utype = request.POST['utype']
         token = request.POST['token']
         if utype == 'user':
@@ -67,7 +68,10 @@ def post_complaint(request):
                 member_obj = Member.objects.get(ward=user_obj.ward)
                 name = request.POST['name']
                 desc = request.POST['desc']
-                img_path = request.FILES['img_path']
+                try:
+                    img_path = request.FILES['img_path']
+                except:
+                    print("error occuerd")
                 status = 'Active'
                 remark = ' '
                 comp_obj = Comp(member_email=member_obj, user_id=user_obj,
@@ -109,16 +113,17 @@ def post_notification(request):
 
 @csrf_exempt
 def update_complaint(request):
-    if request.method == "POST" and request.user.is_authenticated:
+    print("___"*100)
+    if request.method == "POST": 
         utype = request.POST['utype']
-        id = request.POST['id']
+        id = int(request.POST['id'])
         if utype == 'memb':
             com_obj = Comp.objects.filter(id=id).first()
-            com_obj.status = "Inactive"
-            com_obj.remark = " Solved"
+           
+            com_obj.remark = request.POST['remark']
             com_obj.save()
             serializer = ComplaintSerializer(com_obj)
-            return JsonResponse({'notifications': serializer.data})
+            return JsonResponse({'sucess': 'updated sucessful'})
         else:
             return JsonResponse({'error': 'Not member type'})
     else:
