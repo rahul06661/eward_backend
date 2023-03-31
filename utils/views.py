@@ -88,7 +88,8 @@ def post_complaint(request):
 
 @csrf_exempt
 def post_notification(request):
-    if request.method == "POST" and request.user.is_authenticated:
+    if request.method == "POST":
+        img_path=" "
         utype = request.POST['utype']
         token = request.POST['token']
         if utype == 'memb':
@@ -96,7 +97,10 @@ def post_notification(request):
             if user_obj is not None:
                 memb_obj = Member.objects.get(email=user_obj)
                 name = request.POST['name']
-                img_path = request.FILES['img_path']
+                try:
+                    img_path = request.FILES['img_path']
+                except:
+                    print("erorror")
                 desc = request.POST['desc']
                 status = 'Active'
                 notifi_obj = Notification(

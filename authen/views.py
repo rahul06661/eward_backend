@@ -113,30 +113,42 @@ def singin(request):
                 return JsonResponse({'error': 'invalid email'})
         except CustomUser.DoesNotExist:
             return JsonResponse({'error': 'Invalid email'})
+@csrf_exempt
+def approve(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        print()
+        print(email)
+        user_obj = Users.objects.filter(email=email).first()
+        user_obj.approval='1'
+        user_obj.save()
+        return JsonResponse({'msg': 'sucess'})
+    else:
+        return JsonResponse({'msg': 'fail'})
 
 
 @csrf_exempt
-def list_users_not_approved(request, id):
-    if request.user.is_authenticated:
-        if request.user.utype == "memb":
-            if request.method == 'POST':
-                user_obj = Users.objects.filter(approval=0, member_id=id)
-                serializer = UserSerializer(user_obj, many=True)
+def list_users_not_approved(request):
+    if request.method == 'POST':
+        utype = request.POST['utype']
+        if utype == "memb":
+            email = request.POST['email']
+            print(email)
+            user_obj = Users.objects.filter(approval='0', member_email=email)
+            serializer = UserSerializer(user_obj, many=True)
+            print(serializer.data)
+            if user_obj is not None:
                 print(serializer.data)
-                if user_obj is not None:
-                    print(user_obj)
-                    return JsonResponse({"data": serializer.data})
-                else:
-                    return JsonResponse({})
+                return JsonResponse({"data": serializer.data,
+                                     'msg': 'sucess'})
             else:
-                return JsonResponse({'error': 'Invaild message'})
+                return JsonResponse({"data": []})
         else:
-            return JsonResponse({'error': 'Not Memberuser'})
+            return JsonResponse({'msg': 'Invaild message'})
     else:
-        return JsonResponse({'error': 'Not autheticated'})
+        return JsonResponse({'msg': 'Invaild request'})
 
 
-@permission_classes([IsAuthenticated])
 @csrf_exempt
 def list_users_approved(request, id):
     if request.user.is_authenticated:
