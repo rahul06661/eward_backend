@@ -5,7 +5,7 @@ from authen.models import Member,Users
 class Notification(models.Model): 
     member_email=models.ForeignKey(Member,on_delete=models.CASCADE)
     name=models.CharField(max_length=20) 
-    img_path=models.ImageField(upload_to='Notification',null=True)
+    img_path=models.ImageField(upload_to='media',null=True)
     desc=models.CharField(max_length=20)
     status=models.CharField(max_length=20)
     created_on =models.DateField(auto_now_add=True)
@@ -16,7 +16,7 @@ class Comp(models.Model):
     user_id=models.ForeignKey(Users,on_delete=models.CASCADE) 
     name=models.CharField(max_length=20) 
     desc=models.CharField(max_length=20) 
-    img_path=models.ImageField(upload_to='Complaints',null=True)
+    img_path=models.ImageField(upload_to='media',null=True)
     status=models.CharField(max_length=20)
     remark=models.CharField(max_length=20)
     created_on =models.DateField(auto_now_add=True)

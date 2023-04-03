@@ -1,8 +1,6 @@
 from django.shortcuts import render
 import random
-from rest_framework import viewsets
 from .serializers import UserSerializer
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from asgiref.sync import sync_to_async
 from .models import CustomUser
@@ -14,14 +12,10 @@ import re
 from .serializers import UserSerializer
 from .models import Member, Users
 from django.contrib.auth import authenticate
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-
-from .serializers import UserSerializers
+from django.db import IntegrityError
+from .serializers import *
 from django.http import Http404
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+
 
 
 @csrf_exempt
@@ -42,45 +36,73 @@ def UserRegisteration(request):
         housenumber = request.POST['housenumber']
         password = request.POST['password']
         qualification = request.POST['qualification']
+       
+        try:
+            member = Member.objects.get(ward=ward)
+            print("______________________________________________________")
+            print(member)
+        except:
+            return JsonResponse({'msg': 'Registeration not allowed'})
+       
+        try:
+            user_obj = Users(member_email=member, email=email, firstname=firstname, lastname=lastname, voter_id=voter_id, job=job,
+                                tax_payer=tax_payer, qualification=qualification, age=age, gender=gender, phone=phone, blood_group=blood_group, ward=ward, housenumber=housenumber, password=password, approval=False)
+            user_obj.save()
+            custuserobj = CustomUser.objects.create_user(
+                email=email, utype='user', password=password)
+            custuserobj.save()
+            return Response({'msg': 'User registerd'})
+        except IntegrityError as e:
+            return JsonResponse({'msg': 'error occured'})
 
-        member = Member.objects.get(ward=ward)
-        print(
-            "___ ____ ______ ___ _____ ____ ____ ______ ___ _____ ___ ____ _________ _____")
-        print(member)
-        user_obj = Users(member_email=member, email=email, firstname=firstname, lastname=lastname, voter_id=voter_id, job=job,
-                         tax_payer=tax_payer, qualification=qualification, age=age, gender=gender, phone=phone, blood_group=blood_group, ward=ward, housenumber=housenumber, password=password, approval=False)
-        user_obj.save()
-        custuserobj = CustomUser.objects.create_user(
-            email=email, utype='user', password=password)
-        custuserobj.save()
-        return Response({'msg': 'User registerd'})
     else:
-        return Response({'error': 'Invaild request type'})
+        return Response({'msg': 'Invaild request type'})
+
+@csrf_exempt
+def GetMembers(request):
+    if request.method == 'POST':
+        user=request.POST['utype']
+        if user=='admin':
+            memb_obj=Member.objects.all()
+            serialized_memb_obj=MemberSerializer(memb_obj,many=True)
+            return JsonResponse({'data': serialized_memb_obj.data,
+            'msg': 'sucess'})
+        else:
+            return JsonResponse({'msg': 'Not admin type'})
+    else:
+        return JsonResponse({'msg': 'Invaild request'})
+
+
 
 
 @csrf_exempt
 def MemberRegisteration(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        # if not re.match("^[\w\,\+\-]@[\w]+\,[a-z]{2,3}$",email):
-        #    return JsonResponse({'error':'Invalid Mail Address'})
-        firstname = request.POST['firstname']
-        lastname = request.POST['lastname']
-        age = request.POST['age']
-        gender = request.POST['gender']
-        phone = request.POST['phone']
-        blood_group = request.POST['blood_group']
-        ward = request.POST['ward']
-        password = request.POST['password']
-        Member_obj = Member(email=email, firstname=firstname, lastname=lastname, age=age,
-                            gender=gender, phone=phone, blood_group=blood_group, ward=ward, password=password)
-        Member_obj.save()
-        custuserobj = CustomUser.objects.create_user(
-            email=email, utype='memb', password=password)
-        custuserobj.save()
-        return JsonResponse({'msg': 'Member registerd'})
+        user=request.POST['utype']
+        if user=='admin':
+            email = request.POST['email']
+            firstname = request.POST['firstname']
+            lastname = request.POST['lastname']
+            age = request.POST['age']
+            gender = request.POST['gender']
+            phone = request.POST['phone']
+            blood_group = request.POST['blood_group']
+            ward = request.POST['ward']
+            password = 'Rahul@98'
+            try:               
+                Member_obj = Member(email=email, firstname=firstname, lastname=lastname, age=age,
+                                gender=gender, phone=phone, blood_group=blood_group, ward=ward, password=password)
+                Member_obj.save()
+                custuserobj = CustomUser.objects.create_user(
+                email=email, utype='memb', password=password)
+                custuserobj.save()
+                return JsonResponse({'msg': 'Member registerd'})
+            except IntegrityError:
+                return JsonResponse({'msg': 'Already Registered'})           
+        else:
+            return JsonResponse({'msg': 'not Admin'})
     else:
-        return JsonResponse({'error': 'Invaild request type'})
+            return JsonResponse({'msg': 'Invaild request type'})
 
 
 @csrf_exempt
@@ -113,6 +135,8 @@ def singin(request):
                 return JsonResponse({'error': 'invalid email'})
         except CustomUser.DoesNotExist:
             return JsonResponse({'error': 'Invalid email'})
+
+
 @csrf_exempt
 def approve(request):
     if request.method == 'POST':
@@ -120,7 +144,7 @@ def approve(request):
         print()
         print(email)
         user_obj = Users.objects.filter(email=email).first()
-        user_obj.approval='1'
+        user_obj.approval = '1'
         user_obj.save()
         return JsonResponse({'msg': 'sucess'})
     else:
