@@ -1,12 +1,23 @@
 from django.contrib.auth import get_user_model
-from .models import Notification, Comp, family
+from .models import Notification, Comp, family, Comments
 from authen.models import Users, Member
 from authen.models import CustomUser
 from django.http import JsonResponse
-from .serializers import NotificationSerializer, ComplaintSerializer
+from .serializers import *
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+
+
+@csrf_exempt
+def get_complaint_chat(request):
+    if request.method == "POST":
+        complaint_ids = request.POST['id']
+        com_obj = Comp.objects.get(id=complaint_ids)
+        comet_obj = Comments.objects.filter(complaint_id=com_obj)
+        serialobj = CommentSerializer(comet_obj, many=True)
+        return JsonResponse({'messages': serialobj.data,
+                             'msg': 'sucess'})
+    else:
+        return JsonResponse({'msg': 'error occured'})
 
 
 @csrf_exempt
@@ -35,9 +46,6 @@ def get_complaint(request):
     if request.method == "POST":
         utype = request.POST['utype']
         token = request.POST['token']
-        print("_______________")
-        print(utype)
-        print(token)
         obj = CustomUser.objects.get(session_token=token)
         if obj is not None:
             if utype == 'memb':
@@ -58,7 +66,7 @@ def get_complaint(request):
 @csrf_exempt
 def post_complaint(request):
     if request.method == "POST":
-        img_path=" "
+        img_path = " "
         utype = request.POST['utype']
         token = request.POST['token']
         if utype == 'user':
@@ -72,10 +80,9 @@ def post_complaint(request):
                     img_path = request.FILES['img_path']
                 except:
                     print("error occuerd")
-                status = 'Active'
-                remark = ' '
+                status = '1'
                 comp_obj = Comp(member_email=member_obj, user_id=user_obj,
-                                name=name, desc=desc, img_path=img_path, status=status, remark=remark)
+                                name=name, desc=desc, img_path=img_path, status=status)
                 comp_obj.save()
                 return JsonResponse({'sucess': 'complaint registerd'})
             else:
@@ -89,7 +96,7 @@ def post_complaint(request):
 @csrf_exempt
 def post_notification(request):
     if request.method == "POST":
-        img_path=" "
+        img_path = " "
         utype = request.POST['utype']
         token = request.POST['token']
         if utype == 'memb':
@@ -118,20 +125,23 @@ def post_notification(request):
 @csrf_exempt
 def update_complaint(request):
     print("___"*100)
-    if request.method == "POST": 
+    if request.method == "POST":
         utype = request.POST['utype']
         id = int(request.POST['id'])
-        if utype == 'memb':
-            com_obj = Comp.objects.filter(id=id).first()
-           
-            com_obj.remark = request.POST['remark']
-            com_obj.save()
-            serializer = ComplaintSerializer(com_obj)
-            return JsonResponse({'sucess': 'updated sucessful'})
-        else:
-            return JsonResponse({'error': 'Not member type'})
+        remark = request.POST['remark']
+        com_obj = Comp.objects.get(id=id)
+        comment_obj = Comments(complaint_id=com_obj,
+                               user=utype, comment=remark)
+        com_objs = Comp.objects.filter(id=id)
+        if com_objs.status!=3:
+            com_objs.status='2'
+            com_objs.save()
+        comment_obj.save()
+        return JsonResponse({'msg': 'sucess',
+        'status':com_objs.status})
+
     else:
-        return JsonResponse({'error': 'Invaild Request or user not Authenticated'})
+        return JsonResponse({'msg': 'Invaild Request or user not Authenticated'})
 
 
 @csrf_exempt
@@ -153,7 +163,6 @@ def fam_memb_reg(request):
                 gender = request.POST['gender']
                 phone = request.POST['phone']
                 blood_group = request.POST['blood_group']
-
                 qualification = request.POST['qualification']
                 relation = request.POST['relation']
 

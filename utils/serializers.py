@@ -9,5 +9,10 @@ class NotificationSerializer(serializers.ModelSerializer):
 class ComplaintSerializer(serializers.ModelSerializer):
     class Meta:
         model=Comp
-        fields=['id','name','desc','img_path','status','remark','created_on','update_on']
+        fields=['id','name','desc','img_path','status','created_on','update_on']
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Comments
+        fields=['comment','user','update_on']
     

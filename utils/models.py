@@ -18,9 +18,15 @@ class Comp(models.Model):
     desc=models.CharField(max_length=20) 
     img_path=models.ImageField(upload_to='media',null=True)
     status=models.CharField(max_length=20)
-    remark=models.CharField(max_length=20)
     created_on =models.DateField(auto_now_add=True)
     update_on =models.DateField(auto_now=True)
+
+class Comments(models.Model):
+    complaint_id=models.ForeignKey(Comp,on_delete=models.CASCADE)
+    comment=models.CharField(max_length=200)
+    user=models.CharField(max_length=20)
+    update_on=models.DateTimeField(auto_now=True)
+
 
 class family(models.Model):
     user_id=models.ForeignKey(Users,on_delete=models.CASCADE)
