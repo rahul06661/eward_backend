@@ -122,17 +122,19 @@ def post_notification(request):
     else:
         return JsonResponse({'error': 'Invaild Request'})
 
+
 @csrf_exempt
 def get_status(request):
-    if request.method =="POST":
+    if request.method == "POST":
         id = int(request.POST['id'])
         print(id)
         com_objs = Comp.objects.get(id=id)
         print(com_objs.status)
-        return JsonResponse({'msg':'sucess',
-        'status':com_objs.status})
+        return JsonResponse({'msg': 'sucess',
+                             'status': com_objs.status})
     else:
-        return JsonResponse({'msg':'error'})
+        return JsonResponse({'msg': 'error'})
+
 
 @csrf_exempt
 def closecomplaint(request):
@@ -145,7 +147,6 @@ def closecomplaint(request):
                              })
     else:
         return JsonResponse({'msg': 'Invaild Request or user not Authenticated'})
-
 
 
 @csrf_exempt
