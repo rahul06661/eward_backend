@@ -13,6 +13,8 @@ urlpatterns = [
     path('post_noti/',views.post_notification,name="postnotifications"),
     path('update_comp/',views.update_complaint,name="update_complaint"),
     path('family_memb_reg/',views.fam_memb_reg,name="fam_memb_reg"),
-    path('messages/',views.get_complaint_chat,name="getchat")
+    path('messages/',views.get_complaint_chat,name="getchat"),
+    path('getstatus/',views.get_status,name="getstatus"),
+    path('closeComplaint/',views.closecomplaint,name="closecomplaint")
    
 ]

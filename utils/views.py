@@ -14,6 +14,7 @@ def get_complaint_chat(request):
         com_obj = Comp.objects.get(id=complaint_ids)
         comet_obj = Comments.objects.filter(complaint_id=com_obj)
         serialobj = CommentSerializer(comet_obj, many=True)
+
         return JsonResponse({'messages': serialobj.data,
                              'msg': 'sucess'})
     else:
@@ -109,7 +110,7 @@ def post_notification(request):
                 except:
                     print("erorror")
                 desc = request.POST['desc']
-                status = 'Active'
+                status = '1'
                 notifi_obj = Notification(
                     member_email=memb_obj, name=name, img_path=img_path, desc=desc, status=status)
                 notifi_obj.save()
@@ -120,6 +121,31 @@ def post_notification(request):
             return JsonResponse({'error': 'Not member type'})
     else:
         return JsonResponse({'error': 'Invaild Request'})
+
+@csrf_exempt
+def get_status(request):
+    if request.method =="POST":
+        id = int(request.POST['id'])
+        print(id)
+        com_objs = Comp.objects.get(id=id)
+        print(com_objs.status)
+        return JsonResponse({'msg':'sucess',
+        'status':com_objs.status})
+    else:
+        return JsonResponse({'msg':'error'})
+
+@csrf_exempt
+def closecomplaint(request):
+    if request.method == "POST":
+        id = int(request.POST['id'])
+        com_objs = Comp.objects.get(id=id)
+        com_objs.status = '3'
+        com_objs.save()
+        return JsonResponse({'msg': 'Complaint Closed'
+                             })
+    else:
+        return JsonResponse({'msg': 'Invaild Request or user not Authenticated'})
+
 
 
 @csrf_exempt
@@ -132,13 +158,13 @@ def update_complaint(request):
         com_obj = Comp.objects.get(id=id)
         comment_obj = Comments(complaint_id=com_obj,
                                user=utype, comment=remark)
-        com_objs = Comp.objects.filter(id=id)
-        if com_objs.status!=3:
-            com_objs.status='2'
+        com_objs = Comp.objects.get(id=id)
+        if com_objs.status != '3':
+            com_objs.status = '2'
             com_objs.save()
         comment_obj.save()
-        return JsonResponse({'msg': 'sucess',
-        'status':com_objs.status})
+        return JsonResponse({'msg': 'sucess'
+                             })
 
     else:
         return JsonResponse({'msg': 'Invaild Request or user not Authenticated'})
