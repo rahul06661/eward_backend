@@ -1,7 +1,6 @@
 from django.db import models
 from authen.models import Member,Users
 
-
 class Notification(models.Model): 
     member_email=models.ForeignKey(Member,on_delete=models.CASCADE)
     name=models.CharField(max_length=20) 
@@ -26,8 +25,6 @@ class Comments(models.Model):
     comment=models.CharField(max_length=200)
     user=models.CharField(max_length=20)
     update_on=models.DateTimeField(auto_now=True)
-
-
 class family(models.Model):
     user_id=models.ForeignKey(Users,on_delete=models.CASCADE)
     email=models.EmailField(unique=True,max_length=100,null=True)
@@ -36,7 +33,7 @@ class family(models.Model):
     voter_id=models.CharField(max_length=20)
     job=models.CharField(max_length=20)
     tax_payer=models.CharField(max_length=5)
-    age=models.CharField(max_length=3)
+    age=models.IntegerField()
     gender= models.CharField(max_length=3)
     phone =models.CharField(max_length=12)
     blood_group=models.CharField(max_length=3)

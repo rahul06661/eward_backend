@@ -48,13 +48,15 @@ def get_complaint(request):
         utype = request.POST['utype']
         token = request.POST['token']
         obj = CustomUser.objects.get(session_token=token)
+        
         if obj is not None:
             if utype == 'memb':
                 member_obj = Member.objects.get(email=obj)
                 comp_obj = Comp.objects.filter(member_email=member_obj)
             elif utype == 'user':
-                user_obj = Users.objects.get(email=obj)
-                comp_obj = Comp.objects.filter(user_id=user_obj)
+                user_obj = Users.objects.get(email=obj)               
+                memb_obj=Member.objects.get(email=user_obj.member_email)
+                comp_obj = Comp.objects.filter(member_email=memb_obj)
             serializer = ComplaintSerializer(comp_obj, many=True)
             return JsonResponse({'complaints': serializer.data,
                                  'msg': 'sucess'})
@@ -92,6 +94,82 @@ def post_complaint(request):
             return JsonResponse({'error': 'Not user type'})
     else:
         return JsonResponse({'error': 'Invaild Request'})
+
+
+@csrf_exempt
+def analysis(request):
+    if request.method == "POST":
+        data_dict = []
+        selectedData = request.POST['selectedData']
+        selectedItem = request.POST['selectedItem']
+        user = request.POST['user']
+        memb_obj = Member.objects.get(email=user)
+        user_objs = Users.objects.filter(member_email=memb_obj)
+
+        if user_objs is not None:
+            if selectedData == "Age":
+                ages = selectedItem.split('-')
+                age1 = int(ages[0])
+                age2 = int(ages[1])
+                user_objs_data = Users.objects.filter(member_email=memb_obj).filter(age__gt=age1,age__lte=age2 )
+                serializers_user = UserSerializer(user_objs_data, many=True)
+                data_dict = data_dict+serializers_user.data
+                for objs in user_objs:
+                    fam_data_obj = family.objects.filter(
+                                user_id=objs).filter(age__gt=ages[0],age__lte=ages[1] )
+                    serializers_fam = FamilySerializer(
+                                fam_data_obj, many=True)
+                    data_dict = data_dict+serializers_fam.data
+                return JsonResponse({'data': data_dict,
+                                        'msg': 'sucess'})
+            elif selectedData== "Job":
+                print("cdscdscscsdc")
+                user_objs_data = Users.objects.filter(member_email=memb_obj).filter(job=selectedItem)
+                serializers_user = UserSerializer(user_objs_data, many=True)
+                data_dict = data_dict+serializers_user.data
+                print(selectedItem)
+                print(selectedData)
+                print(data_dict)
+
+                for objs in user_objs:
+                    fam_data_obj = family.objects.filter(
+                        user_id=objs).filter(job=selectedItem)
+                    serializers_fam = FamilySerializer(
+                        fam_data_obj, many=True)
+                    data_dict = data_dict+serializers_fam.data
+                return JsonResponse({'data': data_dict,
+                                    'msg': 'sucess'})
+            elif selectedData == "Qualification":
+                user_objs_data = Users.objects.filter(member_email=memb_obj).filter(qualification=selectedItem)
+                serializers_user = UserSerializer(user_objs_data, many=True)
+                data_dict = data_dict+serializers_user.data
+
+                for objs in user_objs:
+                    fam_data_obj = family.objects.filter(
+                        user_id=objs).filter(qualification=selectedItem)
+                    serializers_fam = FamilySerializer(
+                        fam_data_obj, many=True)
+                    data_dict = data_dict+serializers_fam.data
+                return JsonResponse({'data': data_dict,
+                                    'msg': 'sucess'})
+            else:
+                user_objs_data = Users.objects.filter(member_email=memb_obj).filter(blood_group=selectedItem)
+                serializers_user = UserSerializer(user_objs_data, many=True)
+                data_dict = data_dict+serializers_user.data
+                
+                for objs in user_objs:
+                    fam_data_obj = family.objects.filter(
+                        user_id=objs).filter(blood_group=selectedItem)
+                    serializers_fam = FamilySerializer(
+                        fam_data_obj, many=True)
+                    data_dict = data_dict+serializers_fam.data
+                return JsonResponse({'data': data_dict,
+                                        'msg': 'sucess'})
+        else:
+            return JsonResponse({'msg': 'no data found'})
+    else:
+        return JsonResponse({'msg': 'Invaild request'})
+
 
 
 @csrf_exempt
@@ -148,6 +226,25 @@ def closecomplaint(request):
     else:
         return JsonResponse({'msg': 'Invaild Request or user not Authenticated'})
 
+@csrf_exempt
+def complaint_status(request):
+    if request.method=="POST":
+        token=request.POST['token']
+        obj = CustomUser.objects.get(session_token=token)
+        user_obj = Users.objects.get(email=obj)               
+        memb_obj=Member.objects.get(email=user_obj.member_email)
+        comp_obj = Comp.objects.filter(member_email=memb_obj)
+        opencomp = str(len(Comp.objects.filter(member_email=memb_obj,status='1')))
+        pendingcomp =str(len (Comp.objects.filter(member_email=memb_obj,status='2')))
+        closedcomp = str(len(Comp.objects.filter(member_email=memb_obj,status='3')))
+        print(opencomp,pendingcomp,closedcomp)
+        return JsonResponse({'status':{'opencomp': opencomp,
+        'pendingcomp':pendingcomp,
+        'closedcomp':closedcomp}
+                             })
+    else:
+        return JsonResponse({'msg': 'Invaild Request or user not Authenticated'})
+
 
 @csrf_exempt
 def update_complaint(request):
@@ -160,7 +257,7 @@ def update_complaint(request):
         comment_obj = Comments(complaint_id=com_obj,
                                user=utype, comment=remark)
         com_objs = Comp.objects.get(id=id)
-        if com_objs.status != '3':
+        if com_objs.status != '3' and utype=="memb":
             com_objs.status = '2'
             com_objs.save()
         comment_obj.save()
@@ -186,7 +283,7 @@ def fam_memb_reg(request):
                 voter_id = request.POST['voter_id']
                 job = request.POST['job']
                 tax_payer = request.POST['tax_payer']
-                age = request.POST['age']
+                age = int(request.POST['age'])
                 gender = request.POST['gender']
                 phone = request.POST['phone']
                 blood_group = request.POST['blood_group']

@@ -15,6 +15,8 @@ urlpatterns = [
     path('family_memb_reg/',views.fam_memb_reg,name="fam_memb_reg"),
     path('messages/',views.get_complaint_chat,name="getchat"),
     path('getstatus/',views.get_status,name="getstatus"),
-    path('closeComplaint/',views.closecomplaint,name="closecomplaint")
+    path('closeComplaint/',views.closecomplaint,name="closecomplaint"),
+    path('analysis/',views.analysis,name="analysis"),
+    path('compstatus/',views.complaint_status,name="compstats")
    
 ]

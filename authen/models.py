@@ -62,7 +62,7 @@ class Users(models.Model):
     voter_id=models.CharField(max_length=20,unique=True)
     job=models.CharField(max_length=20)
     tax_payer=models.CharField(max_length=5)
-    age=models.CharField(max_length=3)
+    age=models.IntegerField()
     gender= models.CharField(max_length=3)
     phone =models.CharField(max_length=12)
     blood_group=models.CharField(max_length=3)

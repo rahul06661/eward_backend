@@ -16,8 +16,6 @@ from django.db import IntegrityError
 from .serializers import *
 from django.http import Http404
 
-
-
 @csrf_exempt
 def UserRegisteration(request):
     if request.method == 'POST':
@@ -28,7 +26,7 @@ def UserRegisteration(request):
         voter_id = request.POST['voter_id']
         job = request.POST['job']
         tax_payer = request.POST['tax_payer']
-        age = request.POST['age']
+        age = int(request.POST['age'])
         gender = request.POST['gender']
         phone = request.POST['phone']
         blood_group = request.POST['blood_group']
@@ -110,8 +108,7 @@ def singin(request):
     if request.method == 'POST':
         username = request.POST['email']
         password = request.POST['password']
-        if len(password) < 7:
-            return JsonResponse({'error': 'Invalid password'})
+        
         try:
             user = authenticate(email=username, password=password)
             if user is not None:
