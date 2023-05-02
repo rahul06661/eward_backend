@@ -7,6 +7,17 @@ class NotificationSerializer(serializers.ModelSerializer):
         model=Notification       
         fields = ['id','name','img_path','desc','status','created_on','update_on']
 
+class GetwardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Member
+        fields=['ward']
+
+class FamilySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=family
+        fields=['email','firstname','lastname','phone']
+
+
 class ComplaintSerializer(serializers.ModelSerializer):
     class Meta:
         model=Comp

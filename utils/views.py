@@ -301,3 +301,23 @@ def fam_memb_reg(request):
             return JsonResponse({'msg': 'Invalid user'})
     else:
         return JsonResponse({'msg': 'Invaild request'})
+@csrf_exempt
+def get_ward(request):
+    if request.method=="POST":
+        membobj=Member.objects.all()
+        serobj=GetwardSerializer(membobj,many=True)
+        return JsonResponse({'msg': 'Sucess',
+        'wards':serobj.data})
+    else:
+        return JsonResponse({'msg':'Invaild request'})
+
+@csrf_exempt
+def family_members(request):
+    if request.method=="POST":
+        useremail=request.POST['email']
+        family_obj=family.objects.filter(user_id=useremail)
+        family_seri=FamilySerializer(family_obj,many=True)
+        return JsonResponse({'msg': 'Sucess',
+        'wards':family_seri.data})
+    else:
+        return JsonResponse({'msg':'Invaild request'})

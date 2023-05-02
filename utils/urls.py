@@ -17,6 +17,8 @@ urlpatterns = [
     path('getstatus/',views.get_status,name="getstatus"),
     path('closeComplaint/',views.closecomplaint,name="closecomplaint"),
     path('analysis/',views.analysis,name="analysis"),
-    path('compstatus/',views.complaint_status,name="compstats")
+    path('compstatus/',views.complaint_status,name="compstats"),
+    path('getward/',views.get_ward,name="get_ward"),
+    path('getfamily/',views.family_members,name="family_members")
    
 ]
