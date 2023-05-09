@@ -49,7 +49,7 @@ class Member(models.Model):
     phone =models.CharField(max_length=12)
     blood_group=models.CharField(max_length=3)
     ward = models.CharField(max_length=3,unique=True)
-    password=models.CharField(max_length=20)
+    
 
     def __str__(self):
         return self.email
@@ -67,8 +67,7 @@ class Users(models.Model):
     phone =models.CharField(max_length=12)
     blood_group=models.CharField(max_length=3)
     ward = models.CharField(max_length=3)
-    housenumber = models.CharField(max_length=3)
-    password=models.CharField(max_length=20) 
+    housenumber = models.CharField(max_length=3) 
     qualification=models.CharField(max_length=100,null=True)
     approval=models.BooleanField(default=False)
    

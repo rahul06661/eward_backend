@@ -44,7 +44,7 @@ def UserRegisteration(request):
        
         try:
             user_obj = Users(member_email=member, email=email, firstname=firstname, lastname=lastname, voter_id=voter_id, job=job,
-                                tax_payer=tax_payer, qualification=qualification, age=age, gender=gender, phone=phone, blood_group=blood_group, ward=ward, housenumber=housenumber, password=password, approval=False)
+                                tax_payer=tax_payer, qualification=qualification, age=age, gender=gender, phone=phone, blood_group=blood_group, ward=ward, housenumber=housenumber, approval=False)
             user_obj.save()
             custuserobj = CustomUser.objects.create_user(
                 email=email, utype='user', password=password)
@@ -89,7 +89,7 @@ def MemberRegisteration(request):
             password = 'Rahul@98'
             try:               
                 Member_obj = Member(email=email, firstname=firstname, lastname=lastname, age=age,
-                                gender=gender, phone=phone, blood_group=blood_group, ward=ward, password=password)
+                                gender=gender, phone=phone, blood_group=blood_group, ward=ward)
                 Member_obj.save()
                 custuserobj = CustomUser.objects.create_user(
                 email=email, utype='memb', password=password)
@@ -183,7 +183,7 @@ def list_users_approved(request, id):
                 else:
                     return JsonResponse({'msg': 'no users'})
             else:
-                return JsonResponse({'error': 'Invaild message'})
+                return JsonResponse( {'error': 'Invaild message'})
         else:
             return JsonResponse({'error': 'Not Memberuser'})
     else:
