@@ -71,8 +71,6 @@ def GetMembers(request):
         return JsonResponse({'msg': 'Invaild request'})
 
 
-
-
 @csrf_exempt
 def MemberRegisteration(request):
     if request.method == 'POST':
