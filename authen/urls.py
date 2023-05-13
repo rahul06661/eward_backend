@@ -10,6 +10,9 @@ urlpatterns = [
     path('user_signup/',views.UserRegisteration,name="user_reg"),
     path('regs_users/<int:id>/', views.list_users_approved,name="regsted"),
     path('not_regs_user/',views.list_users_not_approved,name="notreg"),
-    path('approve/',views.approve,name="approve")
+    path('approve/',views.approve,name="approve"),
+    path('changepassword/',views.RestPassword,name="reset"),
+    path("resetpass/",views.PasswordReset,name="request-password-reset"),
+    path("password-reset/<str:encoded_pk>/<str:token>/",views.reset_password,name="reset-password"),
     
 ]

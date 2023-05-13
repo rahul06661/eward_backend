@@ -44,7 +44,7 @@ class Member(models.Model):
     email = models.EmailField(max_length=254, unique=True,null=False,primary_key=True)
     firstname=models.CharField(max_length=20)
     lastname=models.CharField(max_length=20)
-    age=models.CharField(max_length=3)   
+    age=models.CharField(max_length=3)    
     gender= models.CharField(max_length=3)
     phone =models.CharField(max_length=12)
     blood_group=models.CharField(max_length=3)
@@ -69,5 +69,5 @@ class Users(models.Model):
     ward = models.CharField(max_length=3)
     housenumber = models.CharField(max_length=3) 
     qualification=models.CharField(max_length=100,null=True)
-    approval=models.BooleanField(default=False)
+    approval=models.BooleanField( default=False)
    

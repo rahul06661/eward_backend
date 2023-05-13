@@ -48,14 +48,14 @@ def get_complaint(request):
         utype = request.POST['utype']
         token = request.POST['token']
         obj = CustomUser.objects.get(session_token=token)
-        
+
         if obj is not None:
             if utype == 'memb':
                 member_obj = Member.objects.get(email=obj)
                 comp_obj = Comp.objects.filter(member_email=member_obj)
             elif utype == 'user':
-                user_obj = Users.objects.get(email=obj)               
-                memb_obj=Member.objects.get(email=user_obj.member_email)
+                user_obj = Users.objects.get(email=obj)
+                memb_obj = Member.objects.get(email=user_obj.member_email)
                 comp_obj = Comp.objects.filter(member_email=memb_obj)
             serializer = ComplaintSerializer(comp_obj, many=True)
             return JsonResponse({'complaints': serializer.data,
@@ -111,20 +111,22 @@ def analysis(request):
                 ages = selectedItem.split('-')
                 age1 = int(ages[0])
                 age2 = int(ages[1])
-                user_objs_data = Users.objects.filter(member_email=memb_obj).filter(age__gt=age1,age__lte=age2 )
+                user_objs_data = Users.objects.filter(
+                    member_email=memb_obj).filter(age__gt=age1, age__lte=age2)
                 serializers_user = UserSerializer(user_objs_data, many=True)
                 data_dict = data_dict+serializers_user.data
                 for objs in user_objs:
                     fam_data_obj = family.objects.filter(
-                                user_id=objs).filter(age__gt=ages[0],age__lte=ages[1] )
+                        user_id=objs).filter(age__gt=ages[0], age__lte=ages[1])
                     serializers_fam = FamilySerializer(
-                                fam_data_obj, many=True)
+                        fam_data_obj, many=True)
                     data_dict = data_dict+serializers_fam.data
                 return JsonResponse({'data': data_dict,
-                                        'msg': 'sucess'})
-            elif selectedData== "Job":
+                                     'msg': 'sucess'})
+            elif selectedData == "Job":
                 print("cdscdscscsdc")
-                user_objs_data = Users.objects.filter(member_email=memb_obj).filter(job=selectedItem)
+                user_objs_data = Users.objects.filter(
+                    member_email=memb_obj).filter(job=selectedItem)
                 serializers_user = UserSerializer(user_objs_data, many=True)
                 data_dict = data_dict+serializers_user.data
                 print(selectedItem)
@@ -140,7 +142,8 @@ def analysis(request):
                 return JsonResponse({'data': data_dict,
                                     'msg': 'sucess'})
             elif selectedData == "Qualification":
-                user_objs_data = Users.objects.filter(member_email=memb_obj).filter(qualification=selectedItem)
+                user_objs_data = Users.objects.filter(
+                    member_email=memb_obj).filter(qualification=selectedItem)
                 serializers_user = UserSerializer(user_objs_data, many=True)
                 data_dict = data_dict+serializers_user.data
 
@@ -153,10 +156,11 @@ def analysis(request):
                 return JsonResponse({'data': data_dict,
                                     'msg': 'sucess'})
             else:
-                user_objs_data = Users.objects.filter(member_email=memb_obj).filter(blood_group=selectedItem)
+                user_objs_data = Users.objects.filter(
+                    member_email=memb_obj).filter(blood_group=selectedItem)
                 serializers_user = UserSerializer(user_objs_data, many=True)
                 data_dict = data_dict+serializers_user.data
-                
+
                 for objs in user_objs:
                     fam_data_obj = family.objects.filter(
                         user_id=objs).filter(blood_group=selectedItem)
@@ -164,12 +168,11 @@ def analysis(request):
                         fam_data_obj, many=True)
                     data_dict = data_dict+serializers_fam.data
                 return JsonResponse({'data': data_dict,
-                                        'msg': 'sucess'})
+                                     'msg': 'sucess'})
         else:
             return JsonResponse({'msg': 'no data found'})
     else:
         return JsonResponse({'msg': 'Invaild request'})
-
 
 
 @csrf_exempt
@@ -226,21 +229,25 @@ def closecomplaint(request):
     else:
         return JsonResponse({'msg': 'Invaild Request or user not Authenticated'})
 
+
 @csrf_exempt
 def complaint_status(request):
-    if request.method=="POST":
-        token=request.POST['token']
+    if request.method == "POST":
+        token = request.POST['token']
         obj = CustomUser.objects.get(session_token=token)
-        user_obj = Users.objects.get(email=obj)               
-        memb_obj=Member.objects.get(email=user_obj.member_email)
+        user_obj = Users.objects.get(email=obj)
+        memb_obj = Member.objects.get(email=user_obj.member_email)
         comp_obj = Comp.objects.filter(member_email=memb_obj)
-        opencomp = str(len(Comp.objects.filter(member_email=memb_obj,status='1')))
-        pendingcomp =str(len (Comp.objects.filter(member_email=memb_obj,status='2')))
-        closedcomp = str(len(Comp.objects.filter(member_email=memb_obj,status='3')))
-        print(opencomp,pendingcomp,closedcomp)
-        return JsonResponse({'status':{'opencomp': opencomp,
-        'pendingcomp':pendingcomp,
-        'closedcomp':closedcomp}
+        opencomp = str(len(Comp.objects.filter(
+            member_email=memb_obj, status='1')))
+        pendingcomp = str(len(Comp.objects.filter(
+            member_email=memb_obj, status='2')))
+        closedcomp = str(len(Comp.objects.filter(
+            member_email=memb_obj, status='3')))
+        print(opencomp, pendingcomp, closedcomp)
+        return JsonResponse({'status': {'opencomp': opencomp,
+                                        'pendingcomp': pendingcomp,
+                                        'closedcomp': closedcomp}
                              })
     else:
         return JsonResponse({'msg': 'Invaild Request or user not Authenticated'})
@@ -257,7 +264,7 @@ def update_complaint(request):
         comment_obj = Comments(complaint_id=com_obj,
                                user=utype, comment=remark)
         com_objs = Comp.objects.get(id=id)
-        if com_objs.status != '3' and utype=="memb":
+        if com_objs.status != '3' and utype == "memb":
             com_objs.status = '2'
             com_objs.save()
         comment_obj.save()
@@ -301,23 +308,95 @@ def fam_memb_reg(request):
             return JsonResponse({'msg': 'Invalid user'})
     else:
         return JsonResponse({'msg': 'Invaild request'})
+
+
 @csrf_exempt
 def get_ward(request):
-    if request.method=="POST":
-        membobj=Member.objects.all()
-        serobj=GetwardSerializer(membobj,many=True)
+    if request.method == "POST":
+        membobj = Member.objects.all()
+        serobj = GetwardSerializer(membobj, many=True)
         return JsonResponse({'msg': 'Sucess',
-        'wards':serobj.data})
+                             'wards': serobj.data})
     else:
-        return JsonResponse({'msg':'Invaild request'})
+        return JsonResponse({'msg': 'Invaild request'})
+
 
 @csrf_exempt
 def family_members(request):
-    if request.method=="POST":
-        useremail=request.POST['email']
-        family_obj=family.objects.filter(user_id=useremail)
-        family_seri=FamilySerializer(family_obj,many=True)
+    if request.method == "POST":
+        useremail = request.POST['email']
+        family_obj = family.objects.filter(user_id=useremail)
+        family_seri = FamilySerializer(family_obj, many=True)
         return JsonResponse({'msg': 'Sucess',
-        'wards':family_seri.data})
+                             'wards': family_seri.data})
     else:
-        return JsonResponse({'msg':'Invaild request'})
+        return JsonResponse({'msg': 'Invaild request'})
+
+
+@csrf_exempt
+def getprofileuser(request):
+    if request.method == "POST":
+        email = request.POST['email']
+        userobj = Users.objects.get(email=email)
+        userdata = GetUsersSerializer(userobj)
+        return JsonResponse({'msg': 'sucess',
+                             'data': userdata.data})
+    else:
+        return JsonResponse({'msg': 'Invaild request'})
+
+
+@csrf_exempt
+def getprofilemember(request):
+    if request.method == "POST":
+        email = request.POST['email']
+        userobj = Member.objects.get(email=email)
+        userdata = GetMemberSerializer(userobj)
+        return JsonResponse({'msg': 'sucess',
+                             'data': userdata.data})
+    else:
+        return JsonResponse({'msg': 'Invaild request'})
+
+
+@csrf_exempt
+def editprofileuser(request):
+    if request.method == "POST":
+        email = request.POST['email']
+        try:
+            userobj = Users.objects.get(email=email)
+        except:
+            return JsonResponse({"msg": "User Not Found"})
+        userobj.firstname = request.POST['firstname']
+        userobj.lastname = request.POST['lastname']
+        userobj.voter_id = request.POST['voter_id']
+        userobj.job = request.POST['job']
+        userobj.tax_payer = request.POST['tax_payer']
+        userobj.age = int(request.POST['age'])
+        userobj.gender = request.POST['gender']
+        userobj.phone = request.POST['phone']
+        userobj.blood_group = request.POST['blood_group']
+        userobj.housenumber = request.POST['housenumber']
+        userobj.qualification = request.POST['qualification']
+        userobj.save()
+        return JsonResponse({'msg': 'Updated'})
+    else:
+        return JsonResponse({'msg': 'Invaild request'})
+
+
+@csrf_exempt
+def editprofilemember(request):
+    if request.method == "POST":
+        email = request.POST['email']
+        try:
+            userobj = Member.objects.get(email=email)
+        except:
+            return JsonResponse({"msg": "User Not Found"})
+        userobj.firstname = request.POST['firstname']
+        userobj.lastname = request.POST['lastname']
+        userobj.age = int(request.POST['age'])
+        userobj.gender = request.POST['gender']
+        userobj.phone = request.POST['phone']
+        userobj.blood_group = request.POST['blood_group']
+        userobj.save()
+        return JsonResponse({'msg': 'Updated'})
+    else:
+        return JsonResponse({'msg': 'Invaild request'})

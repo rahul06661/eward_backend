@@ -19,6 +19,10 @@ urlpatterns = [
     path('analysis/',views.analysis,name="analysis"),
     path('compstatus/',views.complaint_status,name="compstats"),
     path('getward/',views.get_ward,name="get_ward"),
-    path('getfamily/',views.family_members,name="family_members")
-   
+    path('getfamily/',views.family_members,name="family_members"),
+    
+    path('getprofileuser/',views.getprofileuser,name="getprofileuser"),
+    path('getprofilemember/',views.getprofilemember,name="getprofilemember"),
+    path('editprofileuser/',views.editprofileuser,name="editprofileuser"),
+    path('editprofilemember/',views.editprofilemember,name="editprofilemember")
 ]

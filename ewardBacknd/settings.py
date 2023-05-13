@@ -63,7 +63,7 @@ ROOT_URLCONF = 'ewardBacknd.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,7 +139,9 @@ CORS_ORIGIN_ALLOW_ALL=True
 AUTH_USER_MODEL="authen.CustomUser"
 
 REST_FRAMEWORK={
-    'DEFAULT_RENDERER_CLASSES':('rest_framework.renderers.JSONRenderer',),
+    'DEFAULT_RENDERER_CLASSES':[
+    'rest_framework.renderers.JSONRenderer',
+    'rest_framework.renderers.BrowsableAPIRenderer',],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
        'rest_framework.authentication.SessionAuthentication',
@@ -149,6 +151,12 @@ REST_FRAMEWORK={
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_USE_TLS=True
+EMAIL_PORT=587
+EMAIL_HOST_USER="rahulms2023@mca.sjcetpalai.ac.in"
+EMAIL_HOST_PASSWORD="Sjcet123#"
 
 
 CORS_ORIGIN_ALLOW_ALL = True

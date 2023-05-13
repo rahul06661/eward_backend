@@ -37,4 +37,16 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model=Users
         fields=['firstname','lastname','phone','email']
-    
+
+class GetUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Users
+        fields=['firstname','lastname','voter_id','job','tax_payer','age','gender','phone','blood_group','housenumber','qualification']
+
+
+
+class GetMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Member
+        fields=['firstname','lastname','age','gender','phone','blood_group']
+  

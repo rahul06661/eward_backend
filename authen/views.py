@@ -1,5 +1,6 @@
 from django.shortcuts import render
 import random
+from django.core.mail import send_mail
 from .serializers import UserSerializer
 from rest_framework.response import Response
 from asgiref.sync import sync_to_async
@@ -15,6 +16,14 @@ from django.contrib.auth import authenticate
 from django.db import IntegrityError
 from .serializers import *
 from django.http import Http404
+from rest_framework.views import APIView
+from rest_framework import generics, status, viewsets, response
+from django.conf import settings
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from . import serializers
 
 @csrf_exempt
 def UserRegisteration(request):
@@ -57,6 +66,21 @@ def UserRegisteration(request):
         return Response({'msg': 'Invaild request type'})
 
 @csrf_exempt
+def RestPassword(request):
+    if request.method=="POST":
+        email=request.POST["email"]
+        password=request.POST["password"]
+        try:
+            userobj=CustomUser.objects.get(email=email)
+            
+        except:
+            return JsonResponse({'msg':"user not found"})
+        #print(dir(userobj))
+        userobj.set_password(password)
+        userobj.save()
+        return JsonResponse({'msg': 'Password Changed'})
+        
+@csrf_exempt
 def GetMembers(request):
     if request.method == 'POST':
         user=request.POST['utype']
@@ -92,6 +116,11 @@ def MemberRegisteration(request):
                 custuserobj = CustomUser.objects.create_user(
                 email=email, utype='memb', password=password)
                 custuserobj.save()
+                subject="welcome"
+                message="Your default password is : Rahul@98"
+                email_from=settings.EMAIL_HOST_USER
+                recipient_list=[email]
+                send_mail(subject,message,email_from,recipient_list)
                 return JsonResponse({'msg': 'Member registerd'})
             except IntegrityError:
                 return JsonResponse({'msg': 'Already Registered'})           
@@ -113,7 +142,7 @@ def singin(request):
                 user_dicts = CustomUser.objects.filter(
                     email=username).values().first()
 
-                if not user_dicts['utype'] == 'memb':
+                if user_dicts['utype'] != 'memb':
                     if not (Users.objects.get(email=username).approval):
                         return JsonResponse({'error': 'Account not verified'})
                 user_dicts.pop('password')
@@ -127,9 +156,9 @@ def singin(request):
                 login(request, user)
                 return JsonResponse({'token': token, 'user': user_dicts})
             else:
-                return JsonResponse({'error': 'invalid email'})
+                return JsonResponse({'error': 'Invalid Credentials'})
         except CustomUser.DoesNotExist:
-            return JsonResponse({'error': 'Invalid email'})
+            return JsonResponse({'error': 'Invalid Credentials'})
 
 
 @csrf_exempt
@@ -202,3 +231,61 @@ def signout(request, id):
 
 def generatetoken():
     return ''.join(random.SystemRandom().choice([chr(i) for i in range(97, 123)] + [str(i) for i in range(10)]) for _ in range(10))
+
+
+
+@csrf_exempt
+def PasswordReset(request):
+    if request.method=="POST":
+        email = request.POST['email']
+        user = CustomUser.objects.filter(email=email).first()
+        if user:
+            encoded_pk = urlsafe_base64_encode(force_bytes(user.pk))
+            token = PasswordResetTokenGenerator().make_token(user)
+            reset_url = reverse(
+                "reset-password",
+                kwargs={"encoded_pk": encoded_pk, "token": token},
+            )
+            current_ip=request.get_host()
+            reset_link = f"{current_ip}{reset_url}"
+            subject="password Reset Link"
+            message=reset_link
+            email_from=settings.EMAIL_HOST_USER
+            recipient_list=[email]
+            send_mail(subject,message,email_from,recipient_list)
+            return JsonResponse({
+                    "message": 
+                    "Password Resetting link shared"})         
+        else:
+            return JsonResponse({"message": "User doesn't exists"})
+@csrf_exempt          
+def reset_password(request, *args, **kwargs):   
+    if request.method=="POST":
+        password=request.POST.get("password")    
+        token = kwargs.get('token')
+        encoded_pk = kwargs.get('encoded_pk')
+        if token is None or encoded_pk is None:
+            raise 'error'
+        pk = urlsafe_base64_decode(encoded_pk).decode()
+        user = CustomUser.objects.get(pk=pk)
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            raise serializers.ValidationError('The reset token is invalid')       
+        user.set_password(password)
+        user.save()
+        return JsonResponse({'message': 'Password reset complete'}, status=status.HTTP_200_OK)
+    else:
+        return render(request, 'password_change.html')
+
+
+
+class ResetPasswordAPI(generics.GenericAPIView):
+    serializer_class = serializers.ResetPasswordSerializer
+    def patch(self, request, *args, **kwargs):
+        serializer = self.serializer_class(
+            data=request.data, context={"kwargs": kwargs}
+        )
+        serializer.is_valid(raise_exception=True)
+        return response.Response(
+            {"message": "Password reset complete"},
+            status=status.HTTP_200_OK,
+        )
